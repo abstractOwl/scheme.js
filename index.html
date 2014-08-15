@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>scheme.js REPL</title>
+
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
+    <style type="text/css">
+        body {
+            font-family: Courier, monospace;
+        }
+        #log, #input {
+            font-size: 16pt;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Scheme.js</h1>
+        <div class="form-horizontal">
+            <div class="form-group">
+<textarea class="form-control" id="log" rows="15" readonly>
+Welcome to Scheme.js
+Try something like: (+ 1 1)
+
+</textarea>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-1 control-label" for="input">scheme &gt;</label>
+                <div class="col-sm-11">
+                    <input class="form-control" id="input" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="scheme.js"></script>
+    <script>
+        window.onload = function () {
+            var input = document.getElementById('input');
+            var log   = document.getElementById('log');
+
+            input.onkeydown = function (e) {
+                if (e.keyCode == 13 && input.value) {
+                    var result;
+                    log.innerHTML += '> ' + input.value + '\n';
+                    try {
+                        result = Scheme.run(input.value);
+                    } catch (err) {
+                        if (err instanceof SyntaxError) {
+                            result = err.message;
+                        } else {
+                            result = "Syntax Error";
+                            console.log(err);
+                        }
+                    }
+                    log.innerHTML += result + '\n';
+                    input.value = '';
+                    log.innerHTML += '\n';
+                    log.scrollTop = log.scrollHeight;
+
+                    count = history.length - 1;
+                }
+            };
+        };
+    </script>
+</body>
+</html>
