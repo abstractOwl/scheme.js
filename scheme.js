@@ -7,10 +7,10 @@
 
     // Add some standard mappings to the environment
     var globalEnv = new Env({
-        '+':       function (a, b) { return a + b },
-        '-':       function (a, b) { return a - b },
-        '*':       function (a, b) { return a * b },
-        '/':       function (a, b) { return a / b },
+        '+':       expect(function (a, b) { return a + b }, 2),
+        '-':       expect(function (a, b) { return a - b }, 2),
+        '*':       expect(function (a, b) { return a * b }, 2),
+        '/':       expect(function (a, b) { return a / b }, 2),
         'not':     function (x)    { return !x },
 
         // NOTE: Javascript does not allow accessing references, so I have
@@ -90,6 +90,24 @@
     }
 
     /**
+     * Ensures that a function receives the expected number of arguments.
+     *
+     * @param {function} fun - Function to run
+     * @param {number}   num - Expected number of arguments
+     * @return The return value of the function
+     */
+    function expect(fun, num) {
+        return function () {
+            if (arguments.length != num) {
+                throw new SyntaxError('SyntaxError: Argument length mismatch,'
+                        + ' expected' + num + ' but received '
+                        + arguments.length);
+            }
+            return fun.apply(this, Array.prototype.slice.call(arguments));
+        };
+    }
+
+    /**
      * Evaluates an expression.
      *
      * @param {array} x - Parsed representation of the expression
@@ -120,14 +138,14 @@
             var vs = x[1];
             var exp = x[2];
 
-            return function () {
+            return expect(function () {
                 var args = Array.prototype.slice.call(arguments);
                 var params = {};
                 for (var i = 0; i < args.length; i++) {
                     params[vs[i]] = args[i];
                 }
                 return evaluate(exp, new Env(params, env));
-            }
+            }, vs.length);
         } else if (x[0] == 'begin') {
             var exps = x.slice(1);
             var val;
@@ -141,6 +159,8 @@
                 exps.push(evaluate(x[i], env));
             }
             var proc = exps.shift();
+
+            // Args checked in function created by lambda
             return proc.apply(this, exps);
         }
     }
@@ -192,7 +212,7 @@
             return L;
         } else if (token[0] == ')') {
             // Non-matching ")" case
-            throw new SyntaxError('unexpected )');
+            throw new SyntaxError('Mismatched paren error');
         } else {
             return atom(token);
         }
