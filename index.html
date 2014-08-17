@@ -57,6 +57,7 @@ Try something like: (+ 1 1)
                     if (err instanceof SyntaxError) {
                         result = err.message;
                     } else {
+                        // Catch misc errors and print to console
                         result = "Syntax Error";
                         console.log(err);
                     }

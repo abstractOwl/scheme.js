@@ -11,37 +11,43 @@
         '-':       expect(function (a, b) { return a - b }, 2),
         '*':       expect(function (a, b) { return a * b }, 2),
         '/':       expect(function (a, b) { return a / b }, 2),
-        'not':     function (x)    { return !x },
+        'not':     expect(function (x)    { return !x }, 1),
 
         // NOTE: Javascript does not allow accessing references, so I have
         //       just mapped all equality predicates to `a == b`.
-        '=':       function (a, b) { return a == b },
-        'eq?':     function (a, b) { return a == b },
-        'equal?':  function (a, b) { return a == b },
+        '=':       expect(function (a, b) { return a == b }, 2),
+        'eq?':     expect(function (a, b) { return a == b }, 2),
+        'equal?':  expect(function (a, b) { return a == b }, 2),
 
-        '<':       function (a, b) { return a < b },
-        '>':       function (a, b) { return a > b },
-        '<=':      function (a, b) { return a <= b },
-        '>=':      function (a, b) { return a >= b },
+        '<':       expect(function (a, b) { return a < b  }, 2),
+        '>':       expect(function (a, b) { return a > b  }, 2),
+        '<=':      expect(function (a, b) { return a <= b }, 2),
+        '>=':      expect(function (a, b) { return a >= b }, 2),
 
-        'length':  function (l)    { return l.length },
-        'cons':    function (x, y) {
+        'length':  expect(function (l)    { return l.length }, 1),
+        'cons':    expect(function (x, y) {
             return
                 Array.concat(
                     x instanceof Array ? x : [x],
                     y instanceof Array ? y : [y]
                 );
+        }, 2),
+        'car':     expect(function (x) { return x[0] }, 1),
+        'cdr':     expect(function (x) { return x.slice(1) }, 1),
+
+        // list takes any number of arguments
+        'list':    function ()  {
+            return Array.prototype.slice.call(arguments)
         },
-        'car':     function (x) { return x[0] },
-        'cdr':     function (x) { return x.slice(1) },
-        'list':    function ()  { return Array.prototype.slice.call(arguments) },
-        'list?':   function (l) { return l instanceof Array },
-        'null?':   function (l) { return l == [] },
-        'symbol?': function (x) { return typeof x == 'string' }
+
+        'list?':   expect(function (l) { return l instanceof Array }, 1),
+        'null?':   expect(function (l) { return l == [] }, 1),
+        'symbol?': expect(function (x) { return typeof x == 'string' }, 1)
     }, {
+        // Throw an error if reached top scope without finding mapping
         find: function () {
             return {
-                get: function (sym) { throw new Error(sym + 'is undefined!') }
+                get: function (sym) { throw new Error(sym + 'is undefined') }
             }
         }
     });
@@ -99,8 +105,8 @@
     function expect(fun, num) {
         return function () {
             if (arguments.length != num) {
-                throw new SyntaxError('SyntaxError: Argument length mismatch,'
-                        + ' expected' + num + ' but received '
+                throw new SyntaxError('Argument length mismatch,'
+                        + ' expected ' + num + ' but received '
                         + arguments.length);
             }
             return fun.apply(this, Array.prototype.slice.call(arguments));
@@ -197,7 +203,7 @@
      */
     function read_from(tokens) {
         if (tokens.length === 0) {
-            throw new SyntaxError('unexpected EOF while reading');
+            throw new SyntaxError('Unexpected EOF while reading');
         }
 
         var token = tokens.shift();
