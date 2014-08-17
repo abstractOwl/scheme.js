@@ -23,11 +23,3 @@ Factorial:
 
     (begin (define factorial (lambda (n) (if (= n 0) 1 (* n (factorial (- n 1)))))) (factorial 10))
 
-
-## Notes:
-
-    * Because JS is dynamically typed and we're relying heavily on the
-      Javascript interpreter, we run into oddities like:
-
-        > (+ (quote Foo) 1)
-        Foo1
