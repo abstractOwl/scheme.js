@@ -44,33 +44,33 @@ Try something like: (+ 1 1)
     </div>
     <script src="scheme.js"></script>
     <script>
-        window.onload = function () {
-            var input = document.getElementById('input');
-            var log   = document.getElementById('log');
+        var input = document.getElementById('input');
+        var log   = document.getElementById('log');
 
-            input.onkeydown = function (e) {
-                if (e.keyCode == 13 && input.value) {
-                    var result;
-                    log.innerHTML += '> ' + input.value + '\n';
-                    try {
-                        result = Scheme.run(input.value);
-                    } catch (err) {
-                        if (err instanceof SyntaxError) {
-                            result = err.message;
-                        } else {
-                            result = "Syntax Error";
-                            console.log(err);
-                        }
+        input.onkeydown = function (e) {
+            if (e.keyCode == 13 && input.value) {
+                var result;
+                log.innerHTML += '> ' + input.value + '\n';
+                try {
+                    result = Scheme.run(input.value);
+                } catch (err) {
+                    if (err instanceof SyntaxError) {
+                        result = err.message;
+                    } else {
+                        result = "Syntax Error";
+                        console.log(err);
                     }
-                    log.innerHTML += result + '\n';
-                    input.value = '';
-                    log.innerHTML += '\n';
-                    log.scrollTop = log.scrollHeight;
-
-                    count = history.length - 1;
                 }
-            };
+                log.innerHTML += result + '\n';
+                input.value = '';
+                log.innerHTML += '\n';
+                log.scrollTop = log.scrollHeight;
+
+                count = history.length - 1;
+            }
         };
+
+        document.getElementById('input').focus();
     </script>
 </body>
 </html>
