@@ -45,6 +45,7 @@
         'symbol?': expect(function (x) { return typeof x == 'string' }, 1)
     }, {
         // Throw an error if reached top scope without finding mapping
+        addChild: function () { /* noop */ },
         find: function () {
             return {
                 get: function (sym) { throw new Error(sym + 'is undefined') }
@@ -57,6 +58,18 @@
      * scope.
      */
     function Env(env, outer) {
+        var children = [];
+        outer.addChild(this);
+
+        /**
+         * Adds a child Env.
+         *
+         * @param {Env} child - Child to add
+         */
+        this.addChild = function (child) {
+            children.push(child);
+        };
+
         /**
          * Recursively looks up a symbol from the minimum scope up.
          *
@@ -84,6 +97,21 @@
         };
 
         /**
+         * Returns the mappings for this Env.
+         *
+         * @return {object} Mappings for this Env
+         */
+        this.getEnv = function () {
+            var clone = {};
+            for (var k in env) {
+                if (env.hasOwnProperty(k)) {
+                    clone[k] = env[k];
+                }
+            }
+            return clone;
+        };
+
+        /**
          * Sets a mapping between a symbol and a function.
          *
          * @class Env
@@ -92,7 +120,40 @@
          */
         this.set = function (sym, fun) {
             env[sym] = fun;
-        }
+        };
+
+        /**
+         * Returns the JSON representation of this Env and its child Envs.
+         *
+         * @return {string} JSON representation of Env
+         */
+        this.toString = function (n) {
+            var indent = new Array((n || 0) + 2).join('--') + ' ';
+            var body   = '<ul>';
+
+            body += '<li class="mappings">Mappings<ul>';
+            for (var k in env) {
+                if (env.hasOwnProperty(k)) {
+                    body += '<li>';
+                    body += '<span class="key">' + k + '</span>' + (typeof env[k]);
+                    body += '</li>';
+                }
+            }
+            body += '</ul></li>';
+
+            // Nest child envs inside
+            body += '<li>Child Scopes<ul>';
+            for (var i = 0; i < children.length; i++) {
+                body += '<li>' + children[i].toString((n || 0) + 1) + '</li>';
+            }
+            body += '</ul></li></ul>';
+
+            return body;
+        };
+    }
+
+    function pad(str, n) {
+        return str + (new Array(n - str.length + 1).join(' '));
     }
 
     /**
@@ -249,7 +310,7 @@
         if (typeof exp == 'string' || typeof exp == 'number') {
             return exp.toString();
         } else if (typeof exp == 'undefined') {
-            return '[No output]';
+            return 'nil';
         } else if (exp instanceof Array) {
             var exps = [];
             for (var i = 0; i < exp.length; i++) {
@@ -273,6 +334,7 @@
     // and `Scheme.run` respectively.
     exports.Scheme = {
         eval: evaluate,
+        getGlobalEnv: function () { return globalEnv },
         parse: parse,
         run: run
     };

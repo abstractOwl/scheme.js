@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>scheme.js REPL</title>
+    <title>scheme.js repl</title>
 
     <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css">
@@ -11,28 +11,41 @@
             color: white;
             font-family: Courier, monospace;
         }
+
+        .key {
+            display: inline-block;
+            width: 150px;
+        }
+
         #log, #input {
             font-size: 16pt;
         }
         #log {
             border: 0;
             background: transparent;
+            height: 22em;
+            overflow: auto;
+        }
+        #log div {
+            padding-bottom: 1em;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Scheme.js</h1>
+        <h1>scheme.js</h1>
 
         <br />
 
         <div class="form-horizontal">
             <div class="form-group">
-<textarea class="form-control" id="log" rows="15" readonly>
-Welcome to Scheme.js
-Try something like: (+ 1 1)
+                <div class="form-control" id="log">
+                    <div>
+                        Welcome to Scheme.js<br />
+                        Type <b>env</b> or <b>help</b>.
+                    </div>
 
-</textarea>
+                </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-1 control-label" for="input">scheme &gt;</label>
@@ -44,15 +57,22 @@ Try something like: (+ 1 1)
     </div>
     <script src="scheme.js"></script>
     <script>
+        var NL = '<br />';
         var input = document.getElementById('input');
         var log   = document.getElementById('log');
 
         input.onkeydown = function (e) {
             if (e.keyCode == 13 && input.value) {
                 var result;
-                log.innerHTML += '> ' + input.value + '\n';
                 try {
-                    result = Scheme.run(input.value);
+                    if (input.value.trim() == 'env') {
+                        result = 'Printing env...\n' + Scheme.getGlobalEnv().toString();
+                    } else if (input.value.trim() == 'help') {
+                        result = 'See <a href="https://github.com/abstractOwl/scheme.js">'
+                            + 'https://github.com/abstractOwl/scheme.js</a> for examples';
+                    } else {
+                        result = Scheme.run(input.value);
+                    }
                 } catch (err) {
                     if (err instanceof SyntaxError) {
                         result = err.message;
@@ -62,12 +82,14 @@ Try something like: (+ 1 1)
                         console.log(err);
                     }
                 }
-                log.innerHTML += result + '\n';
-                input.value = '';
-                log.innerHTML += '\n';
-                log.scrollTop = log.scrollHeight;
 
-                count = history.length - 1;
+                var line = document.createElement('div');
+                line.innerHTML = '> ' + input.value + NL;
+                line.innerHTML += result.replace(/\n/g, NL) + NL;
+                log.appendChild(line);
+
+                input.value = '';
+                log.scrollTop = log.scrollHeight;
             }
         };
 
